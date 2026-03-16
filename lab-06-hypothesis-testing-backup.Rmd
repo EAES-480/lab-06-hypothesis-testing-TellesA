@@ -102,7 +102,7 @@ Possible examples:
 - `le`
 
 ```{r choose_variable, echo=TRUE, eval=FALSE}
-target_var <- "___"
+target_var <- "ta"
 
 # CHECK: does this variable exist?
 target_var %in% names(df)
@@ -112,11 +112,11 @@ target_var %in% names(df)
 
 Write the population parameter you care about:
 
-> $\mu$ = the true 2023 population mean of `___`
+> $\mu$ = the true 2023 population mean of `air temperature`
 
 Fill in the blank in words:
 
-> In this lab, my population parameter is the true annual mean of **`___`** at the US-AMS site.
+> In this lab, my population parameter is the true annual mean of **`air temperature`** at the US-AMS site.
 
 ---
 
@@ -136,11 +136,11 @@ Now turn your claim into hypotheses:
 
 Fill these in:
 
-> My claim is: `___`
+> My claim is: `The annual mean air temperature is 11 °C. `
 
-> $H_0$: `___`
+> $H_0$: ` mu = 11`
 
-> $H_A$: `___`
+> $H_A$: `mu < 11`
 
 ---
 
@@ -149,9 +149,9 @@ Fill these in:
 ```{r draw_sample, echo=TRUE, eval=FALSE}
 # GOAL: Draw one random sample and compute its mean.
 
-set.seed(___)
+set.seed(234)
 
-n_samp <- ___   # e.g., 200
+n_samp <- 500   # e.g., 200
 
 samp <- df %>%
   filter(!is.na(.data[[target_var]])) %>%
@@ -164,7 +164,7 @@ sample_mean
 
 **Prompt (2–3 sentences):** How does your sample mean compare to your claim? Is it close, or already quite different?
 
-> *Write your answer here.*
+> The sample mean is much smaller than my claim. This does not align with the null hypthesis, but does work for the alternative hypothesis. 
 
 ---
 
@@ -173,9 +173,9 @@ sample_mean
 ```{r bootstrap_means, echo=TRUE, eval=FALSE}
 # GOAL: Bootstrap the sample mean to estimate uncertainty.
 
-set.seed(___)
+set.seed(123)
 
-B <- ___   # e.g., 4000
+B <- 4000   # e.g., 4000
 
 boot_means <- replicate(
   B,
@@ -191,7 +191,7 @@ head(boot_means)
 # GOAL: Compute the bootstrap SE and 95% CI.
 
 boot_se <- sd(boot_means)
-boot_ci <- quantile(boot_means, probs = c(___, ___))
+boot_ci <- quantile(boot_means, probs = c(0.025, 0.975))
 
 tibble(
   sample_mean = sample_mean,
@@ -203,7 +203,7 @@ tibble(
 
 **Prompt (2–3 sentences):** What does the bootstrap SE tell you? What does the 95% CI tell you?
 
-> *Write your answer here.*
+> The bootstrap SE is the standard deviation of the bootstrap distribution which is used to quantify uncertainty. The 95% confidence interval tells us that 95% of the calculated bootstrap intervals include the population parameter. This is shown by the sample mean being in between the lower and upper intervals. 
 
 ---
 
@@ -214,7 +214,7 @@ Define the null value from your claim.
 ```{r hypothesis_test, echo=TRUE, eval=FALSE}
 # GOAL: Compute z and p-value for your claim.
 
-mu0 <- ___   # numeric claim value
+mu0 <- 11   # numeric claim value
 
 z_stat <- (sample_mean - mu0) / boot_se
 
@@ -241,15 +241,15 @@ Use your p-value and CI to answer:
 
 Fill in:
 
-> The null value `___` is / is not inside my 95% CI.
+> The null value `11` is not inside my 95% CI.
 
-> My p-value is `___`, which is small / large.
+> My p-value is `2.99e-24`, which is small.
 
-> Therefore, I would / would not reject $H_0$ at the 0.05 level.
+> Therefore, I would reject $H_0$ at the 0.05 level.
 
 **Prompt (4–6 sentences):** Explain your decision in plain language. Do the data make the claim look plausible or surprising? Be careful: “fail to reject” does not mean “prove true.”
 
-> *Write your answer here.*
+> The very small p-value and the null value being outside of the 95% confidence interval provides strong evidence against the null hypothesis. Therefore, it is reasonable to reject the null hypothesis and accept the alternative hypothesis. When looking at the original data this claim does seem plausible considering the seasonailty that contribute extremely high or low temperatures. The average of these temperatures do approximately equal 6 °C, though I did think it would be larger (might have to move now). 
 
 ---
 
@@ -259,7 +259,7 @@ Fill in:
 # GOAL: Plot the bootstrap distribution, sample mean, CI, and null value.
 
 ggplot(tibble(boot_mean = boot_means), aes(x = boot_mean)) +
-  geom_histogram(bins = ___, alpha = 0.8) +
+  geom_histogram(bins = 50, alpha = 0.8) +
   geom_vline(xintercept = sample_mean, linetype = "dashed", linewidth = 1.1) +
   geom_vline(xintercept = boot_ci, color = "red", linewidth = 1.1) +
   geom_vline(xintercept = mu0, color = "blue", linewidth = 1.1) +
@@ -274,8 +274,7 @@ ggplot(tibble(boot_mean = boot_means), aes(x = boot_mean)) +
 
 **Prompt (2–3 sentences):** Does the plot agree with your p-value-based conclusion? Explain.
 
-> *Write your answer here.*
-
+> The plot does agree with the conclusion made earlier because it shows the blue line (null value) is far from the dashed line (sample mean) and is outside of the red lines (representing the confidence interval). These show that the null value is far from the estimates made by the bootstrap distribution which further proves the rejection of the null hypothesis. 
 ---
 
 ## 10) Try a second claim (short extension)
@@ -285,7 +284,7 @@ Keep the same variable, but test a **different null value**.
 ```{r second_claim, echo=TRUE, eval=FALSE}
 # GOAL: Test a second claim using the same sample and bootstrap SE.
 
-mu0_alt <- ___
+mu0_alt <- 7
 
 z_stat_alt <- (sample_mean - mu0_alt) / boot_se
 p_value_alt <- 2 * pnorm(-abs(z_stat_alt))
@@ -299,8 +298,7 @@ tibble(
 
 **Prompt (3–4 sentences):** How did changing the null value change the conclusion? What does this tell you about the relationship between the null hypothesis and the observed estimate?
 
-> *Write your answer here.*
-
+> When changing the null value to 7, the z-score and the p-value increased. A higher p-value could change the conclusion to failing to reject the new null hypothesis, however it is still pretty small. Initially, this made me think that the null hypothesis can act almost like an arbitrary value when compared to the observed estimate. No matter what the null value is, the observed estimate will stay the same and use the p-value to determine how likely that null value is to be true. 
 ---
 
 
