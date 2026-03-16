@@ -326,7 +326,7 @@ If you already created `day_night` earlier, you can reuse it. Otherwise, create 
 
 df <- df %>%
   mutate(
-    day_night = if_else(___ == 1, "Day", "Night")
+    day_night = if_else(daytime == 1, "Day", "Night")
   )
 
 df %>% count(day_night)
@@ -346,7 +346,7 @@ Possible examples:
 - `le`
 
 ```{r choose_response_ttest, echo=TRUE, eval=FALSE}
-response_var <- "___"
+response_var <- "le"
 
 # CHECK: does this variable exist?
 response_var %in% names(df)
@@ -369,20 +369,28 @@ You may use:
 
 df %>%
   filter(!is.na(.data[[response_var]])) %>%
-  ggplot(aes(x = ___, y = ___, fill = ___)) +
+  ggplot(aes(x = daytime, y = le)) +
   geom_boxplot(alpha = 0.8) +
+  facet_wrap(df$daytime)+
   theme_classic(base_size = 18) +
   labs(
     x = NULL,
     y = response_var,
-    title = "Response by day vs night"
+    title = "Response by day vs night",
+    subtitle = "0 = night, 1 = day"
   )
+
+df%>%
+  filter(!is.na(.data[[response_var]])) %>%
+  ggplot(aes(x = daytime, y = le))+
+  geom_jitter()+
+  facet_wrap(df$daytime)
 ```
 
 **Prompt (2–3 sentences):** Before running the test, what do you predict?  
 Do the groups look different in center? In spread?
 
-> *Write your answer here.*
+> I predict that the latent heat will be higher during the daytime than the nighttime because there is no solar radiation at night. The boxplot shows that the center for daytime is higher than nighttime. The spread is also much larger for daytime compared to nighttime.There are also many outliers for each grouping. 
 
 ---
 
@@ -395,15 +403,16 @@ Compute the group means, SDs, and sample sizes.
 
 group_summary <- df %>%
   filter(!is.na(.data[[response_var]])) %>%
-  group_by(___) %>%
+  group_by(daytime) %>%
   summarise(
-    mean_response = ___,
-    sd_response = ___,
-    n = ___,
+    mean_response = mean(le),
+    sd_response = sd(le),
+    n = n(),
     .groups = "drop"
   )
 
 group_summary
+#0 = night and 1 = day
 ```
 
 ---
@@ -419,11 +428,11 @@ Use this structure:
 
 Fill in:
 
-> My response variable is `___`
+> My response variable is `latent heat flux`
 
-> $H_0$: `___`
+> $H_0$: `the mean latent heat flux for daytime and nighttime are equal`
 
-> $H_A$: `___`
+> $H_A$: `the mean latent heat flux is for daytime and nighttime are different`
 
 ---
 
@@ -435,8 +444,8 @@ Use `t.test()` to compare the means of your response variable between Day and Ni
 # GOAL: run a two-sample t-test by formula.
 
 t.test(
-  ___ ~ ___,
-  data = ___
+  le ~ daytime,
+  data = df
 )
 ```
 
@@ -444,7 +453,7 @@ t.test(
 Would you reject the null hypothesis at $\alpha = 0.05$?  
 What does the result imply about day vs night differences in your chosen variable?
 
-> *Write your answer here.*
+> The p-value is less than 2.2e-16 and the confidence interval is between -79.11 and -74.92. With the small p-value and the confidence interval excluding 0, I would reject the null hypothesis. This implies that there is a difference between daytime and nighttime latent heat flux levels. Though you can estimate that difference using the sample mean estimates, the t-test is only stating that there is a difference between both groups for this variable. 
 
 ---
 
@@ -456,8 +465,8 @@ Extract the confidence interval and interpret it as a difference in means.
 # GOAL: store the t-test result in an object.
 
 tt_daynight <- t.test(
-  ___ ~ ___,
-  data = ___
+  le ~ daytime,
+  data = df
 )
 
 tt_daynight$conf.int
@@ -466,7 +475,7 @@ tt_daynight$conf.int
 **Prompt (2–3 sentences):** Does the confidence interval include 0?  
 How does that connect to the hypothesis test decision?
 
-> *Write your answer here.*
+> The confidence interval does not include 0. As previously mentioned, this means that you reject the null hypothesis. 
 
 ---
 
@@ -475,18 +484,18 @@ How does that connect to the hypothesis test decision?
 Create bootstrap distributions of the **group means** for Day and Night separately.
 
 ```{r bootstrap_group_means, echo=TRUE, eval=FALSE}
-set.seed(___)
+set.seed(567)
 
-B <- ___   # e.g., 2000
+B <- 2000   # e.g., 2000
 
 x_day <- df %>%
   filter(day_night == "Day") %>%
-  pull(___) %>%
+  pull(response_var) %>%
   na.omit()
 
 x_night <- df %>%
   filter(day_night == "Night") %>%
-  pull(___) %>%
+  pull(response_var) %>%
   na.omit()
 
 boot_day <- replicate(
@@ -509,7 +518,7 @@ boot_groups <- bind_rows(
 # GOAL: visualize the bootstrap distributions by group.
 
 ggplot(boot_groups, aes(x = mean_est, fill = group)) +
-  geom_histogram(alpha = 0.45, bins = ___, position = "identity") +
+  geom_histogram(alpha = 0.45,bins = 50, position = "identity") +
   theme_classic(base_size = 18) +
   labs(
     x = paste0("Bootstrap mean of ", response_var),
@@ -521,7 +530,7 @@ ggplot(boot_groups, aes(x = mean_est, fill = group)) +
 **Prompt (3–4 sentences):** How does this bootstrap visualization help you understand the t-test result?  
 Do the plausible group means strongly overlap, or are they clearly separated?
 
-> *Write your answer here.*
+> This histogram of the bootstrap simulation does indeed show that the day and night groupings are different based on the far distance between the two. The group means are clearly separated with the day being closer to 100 and the night being less than 25. This further supports the alterative hypothesis that was concluded from the t-test results.
 
 ---
 
@@ -543,8 +552,16 @@ You must:
 # GOAL: create your own two-level grouping variable.
 
 df <- df %>%
+  mutate( 
+  date = as.Date(doy - 1, origin = paste0(year_local, "-01-01")),
+  month = month(date, label = TRUE, abbr = TRUE)
+  )
+
+df <- df%>%
+  group_by(le)%>%
   mutate(
-    my_group = ___
+    my_group =  if_else(month %in% c("Dec","Jan","Feb"), "winter",
+                if_else(month %in% c("Jun","Jul","Aug"), "summer", NA_character_))
   )
 
 df %>% count(my_group)
@@ -552,7 +569,7 @@ df %>% count(my_group)
 
 **Prompt (2–3 sentences):** Why did you choose this grouping variable? What scientific contrast are you testing?
 
-> *Write your answer here.*
+> I chose summer vs. winter for the grouping variable because similar to the air temperature, I would expect latent heat flux to have a seasonal pattern as well as diurnal. I would expect le to be higher during the times with the most solar radiaiton (in the summer) and to be lower during the winter. 
 
 ---
 
@@ -567,27 +584,48 @@ Repeat the workflow:
 
 ```{r visualize_second_group, echo=TRUE, eval=FALSE}
 # GOAL: visualize your response by your chosen grouping variable.
-
-___
+ggplot(df, aes(x = my_group, y = le))+
+  geom_boxplot(alpha = 0.8)+
+  theme_classic(base_size = 18) +
+  labs(
+    x = NULL,
+    y = "latent heat flux",
+    title = "Response by winter vs summer"
+  )
 ```
 
 ```{r summarize_second_group, echo=TRUE, eval=FALSE}
 # GOAL: summarize your response variable by your chosen grouping variable.
 
-___
+group_summary <- df %>%
+  filter(!is.na(.data[["le"]])) %>%
+  group_by(my_group) %>%
+  summarise(
+    mean_response = mean(le),
+    sd_response = sd(le),
+    n = n(),
+    .groups = "drop"
+  )
+
+group_summary
 ```
 
 ```{r ttest_second_group, echo=TRUE, eval=FALSE}
 # GOAL: run a two-sample t-test for your chosen grouping variable.
 
-___
+tt_season <- t.test(
+  le ~ my_group,
+  data = df
+)
+
+tt_season
 ```
 
 **Prompt (5–6 sentences):** Compare the day/night t-test to your second grouping-variable test.  
 Which contrast was stronger? Which was more scientifically meaningful?  
 Did the two tests produce similar or different conclusions?
 
-> *Write your answer here.*
+> When comparing teh day/night t-test to the winter/summer t-test, there doesn't seem to be much of a difference statistically. Both have the same p-value and exclude 0 from the 95% confidence interval. This means that we would reject the null hypothesis for both. The main difference is between the t-value, with the seasonal one being postive and the dinural one being negative. This usually means that the sample mean for the seasonal le is higher than the hypothesized population. For the dinural le, the sample mean is lower than the hypothesized population. 
 
 ---
 
@@ -599,7 +637,7 @@ Answer in **4–6 sentences**:
 - What changes when we move from “testing one mean” to “testing a difference in means”?
 - How did the bootstrap group-mean plot help your understanding?
 
-> *Write your answer here.*
+> Both the two-sample t-test and one-mean hypothesis test can quantify the statistical significance of the chosen variables. When changing from testing one mean to a difference in means is the when testing the difference you are comparing more than one variable to eachother. When testing one mean there is usually only one main variable involved. Plotting the bootstrap group-mean helped me visualize the results from the hypothesis tests.
 
 
 # Submission
