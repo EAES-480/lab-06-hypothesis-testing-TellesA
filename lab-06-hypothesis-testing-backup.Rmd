@@ -15,6 +15,8 @@ editor_options:
   chunk_output_type: inline
 ---
 
+> GRADE GM: 9.25/10 - great work!
+
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(lubridate)
@@ -144,6 +146,8 @@ Fill these in:
 
 ---
 
+> GM: -0.5 not quite. you need statements like "The annual mean air tempertaure is 11 C" (null) and "The annual mean air temperature is different than (not only smaller than) 11 (alt)
+
 ## 4) Draw one sample and compute the sample mean
 
 ```{r draw_sample, echo=TRUE, eval=FALSE}
@@ -205,6 +209,8 @@ tibble(
 
 > The bootstrap SE is the standard deviation of the bootstrap distribution which is used to quantify uncertainty. The 95% confidence interval tells us that 95% of the calculated bootstrap intervals include the population parameter. This is shown by the sample mean being in between the lower and upper intervals. 
 
+> GM: Phrasing for CI not quite accurate. the 95% CI gives you the range of values within which we can say the true poluation parameter lies, at a 95% confidence level.
+
 ---
 
 ## 7) Convert the claim into a formal test
@@ -251,6 +257,8 @@ Fill in:
 
 > The very small p-value and the null value being outside of the 95% confidence interval provides strong evidence against the null hypothesis. Therefore, it is reasonable to reject the null hypothesis and accept the alternative hypothesis. When looking at the original data this claim does seem plausible considering the seasonailty that contribute extremely high or low temperatures. The average of these temperatures do approximately equal 6 °C, though I did think it would be larger (might have to move now). 
 
+> GM: Good answer!
+
 ---
 
 ## 9) Visualize the hypothesis test
@@ -275,6 +283,8 @@ ggplot(tibble(boot_mean = boot_means), aes(x = boot_mean)) +
 **Prompt (2–3 sentences):** Does the plot agree with your p-value-based conclusion? Explain.
 
 > The plot does agree with the conclusion made earlier because it shows the blue line (null value) is far from the dashed line (sample mean) and is outside of the red lines (representing the confidence interval). These show that the null value is far from the estimates made by the bootstrap distribution which further proves the rejection of the null hypothesis. 
+
+> GM: Good answer!
 ---
 
 ## 10) Try a second claim (short extension)
@@ -299,6 +309,9 @@ tibble(
 **Prompt (3–4 sentences):** How did changing the null value change the conclusion? What does this tell you about the relationship between the null hypothesis and the observed estimate?
 
 > When changing the null value to 7, the z-score and the p-value increased. A higher p-value could change the conclusion to failing to reject the new null hypothesis, however it is still pretty small. Initially, this made me think that the null hypothesis can act almost like an arbitrary value when compared to the observed estimate. No matter what the null value is, the observed estimate will stay the same and use the p-value to determine how likely that null value is to be true. 
+
+> GM: Good answer!
+
 ---
 
 
@@ -392,6 +405,8 @@ Do the groups look different in center? In spread?
 
 > I predict that the latent heat will be higher during the daytime than the nighttime because there is no solar radiation at night. The boxplot shows that the center for daytime is higher than nighttime. The spread is also much larger for daytime compared to nighttime.There are also many outliers for each grouping. 
 
+> GM: Good answer!
+
 ---
 
 ## 14) Summarize the two groups
@@ -434,6 +449,8 @@ Fill in:
 
 > $H_A$: `the mean latent heat flux is for daytime and nighttime are different`
 
+> GM: Good answer!
+
 ---
 
 ## 16) Run a two-sample t-test
@@ -454,6 +471,8 @@ Would you reject the null hypothesis at $\alpha = 0.05$?
 What does the result imply about day vs night differences in your chosen variable?
 
 > The p-value is less than 2.2e-16 and the confidence interval is between -79.11 and -74.92. With the small p-value and the confidence interval excluding 0, I would reject the null hypothesis. This implies that there is a difference between daytime and nighttime latent heat flux levels. Though you can estimate that difference using the sample mean estimates, the t-test is only stating that there is a difference between both groups for this variable. 
+
+> GM: Good answer!
 
 ---
 
@@ -476,6 +495,8 @@ tt_daynight$conf.int
 How does that connect to the hypothesis test decision?
 
 > The confidence interval does not include 0. As previously mentioned, this means that you reject the null hypothesis. 
+
+> GM: Good answer!
 
 ---
 
@@ -532,6 +553,8 @@ Do the plausible group means strongly overlap, or are they clearly separated?
 
 > This histogram of the bootstrap simulation does indeed show that the day and night groupings are different based on the far distance between the two. The group means are clearly separated with the day being closer to 100 and the night being less than 25. This further supports the alterative hypothesis that was concluded from the t-test results.
 
+> GM: Good answer!
+
 ---
 
 ## 19) Choose a second grouping variable of your own
@@ -570,6 +593,8 @@ df %>% count(my_group)
 **Prompt (2–3 sentences):** Why did you choose this grouping variable? What scientific contrast are you testing?
 
 > I chose summer vs. winter for the grouping variable because similar to the air temperature, I would expect latent heat flux to have a seasonal pattern as well as diurnal. I would expect le to be higher during the times with the most solar radiaiton (in the summer) and to be lower during the winter. 
+
+> GM: Good answer!
 
 ---
 
@@ -627,6 +652,8 @@ Did the two tests produce similar or different conclusions?
 
 > When comparing teh day/night t-test to the winter/summer t-test, there doesn't seem to be much of a difference statistically. Both have the same p-value and exclude 0 from the 95% confidence interval. This means that we would reject the null hypothesis for both. The main difference is between the t-value, with the seasonal one being postive and the dinural one being negative. This usually means that the sample mean for the seasonal le is higher than the hypothesized population. For the dinural le, the sample mean is lower than the hypothesized population. 
 
+> GM: Good answer!
+
 ---
 
 ## 21) Final reflection
@@ -638,6 +665,8 @@ Answer in **4–6 sentences**:
 - How did the bootstrap group-mean plot help your understanding?
 
 > Both the two-sample t-test and one-mean hypothesis test can quantify the statistical significance of the chosen variables. When changing from testing one mean to a difference in means is the when testing the difference you are comparing more than one variable to eachother. When testing one mean there is usually only one main variable involved. Plotting the bootstrap group-mean helped me visualize the results from the hypothesis tests.
+
+> GM: -0.25 not quite. a one-mean and two-sample t-test both evaluate a claim related to similarity or difference between a value and a mean or two means. when we test a two means, each mean is associated with a boostrap (approximated sampling) distribution, and has variation, whereas the one-mean test is comparing a mean bootstrap distribution against a single value (straight line on plot). good answer for plot.
 
 
 # Submission
